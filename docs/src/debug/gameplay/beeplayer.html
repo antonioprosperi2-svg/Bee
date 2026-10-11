@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BeePlayer — BeeEngine JS</title>
+  <meta name="description" content="Entità giocabile con speed 220, gravità 500, jumpForce iniziale -420, score 0, lives 3 e mode &quot;platformer&quot;. In mode &quot;free&quot; il verticale segue i tasti e vy non usa il salto.">
+  <link rel="canonical" href="https://beeenginejs.com/docs/beeplayer.html">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b22;
+      --line: #2a2f3a;
+      --txt: #e8eaf0;
+      --mut: #9aa3b2;
+      --acc: #f5b301;
+      --acc2: #ffd34d
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      line-height: 1.6
+    }
+
+    a {
+      color: var(--acc2);
+      text-decoration: none
+    }
+
+    a:hover {
+      text-decoration: underline
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px
+    }
+
+    header {
+      border-bottom: 1px solid var(--line)
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--txt)
+    }
+
+    .logo span {
+      color: var(--acc)
+    }
+
+    nav .links a {
+      margin-left: 20px;
+      color: var(--mut);
+      font-size: .95rem
+    }
+
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      margin-bottom: 18px
+    }
+
+    .hero h1 span {
+      color: var(--acc)
+    }
+
+    .hero p {
+      color: var(--mut);
+      font-size: 1.15rem;
+      max-width: 640px;
+      margin: 0 auto 32px
+    }
+
+    .btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600
+    }
+
+    .btn.p {
+      background: var(--acc);
+      color: #111
+    }
+
+    .btn.p:hover {
+      background: var(--acc2);
+      text-decoration: none
+    }
+
+    .btn.s {
+      border: 1px solid var(--line);
+      color: var(--txt)
+    }
+
+    .btn.s:hover {
+      border-color: var(--acc);
+      text-decoration: none
+    }
+
+    pre {
+      background: #0a0c10;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-size: .92rem;
+      text-align: left
+    }
+
+    code {
+      font-family: ui-monospace, Consolas, monospace;
+      color: #ffe08a
+    }
+
+    .install {
+      max-width: 420px;
+      margin: 36px auto 0
+    }
+
+    section {
+      padding: 50px 0
+    }
+
+    h2 {
+      font-size: 1.7rem;
+      margin-bottom: 24px;
+      text-align: center
+    }
+
+    h3.cat {
+      font-size: 1.1rem;
+      color: var(--acc);
+      margin: 32px 0 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px
+    }
+
+    .card {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      color: inherit;
+      transition: border-color .15s, transform .15s
+    }
+
+    a.card:hover {
+      border-color: var(--acc);
+      transform: translateY(-2px);
+      text-decoration: none
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+      color: var(--txt)
+    }
+
+    .card p {
+      color: var(--mut);
+      font-size: .95rem
+    }
+
+    .ico {
+      font-size: 1.6rem;
+      margin-bottom: 8px
+    }
+
+    .cerca {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--txt);
+      font-size: 1rem
+    }
+
+    .cerca:focus {
+      outline: none;
+      border-color: var(--acc)
+    }
+
+    .nascosto {
+      display: none
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 30px 0;
+      color: var(--mut);
+      font-size: .9rem;
+      text-align: center
+    }
+
+    @media(max-width:560px) {
+      nav .links a:not(:last-child) {
+        display: none
+      }
+    }
+  
+    .doc h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin: 8px 0 12px; text-align: left; }
+    .doc h2 { font-size: 1.25rem; margin: 28px 0 12px; text-align: left; }
+    .doc .lead { color: var(--mut); font-size: 1.05rem; max-width: 720px; }
+    .doc .meta { color: var(--mut); margin: 8px 0 0; }
+    .back { display: inline-block; margin: 8px 0 18px; }
+    .doc-table { overflow-x: auto; margin: 8px 0 4px; }
+    .doc table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    .doc th, .doc td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+    .doc th { background: var(--card); color: var(--acc); font-weight: 600; }
+    .doc td code { white-space: normal; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <nav>
+        <a class="logo" href="../index.html">🐝 Bee<span>Engine</span> JS</a>
+        <div class="links">
+          <a href="../index.html#classi">Documentazione</a>
+          <a href="https://www.npmjs.com/package/beeengine">npm</a>
+          <a href="https://github.com/antonioprosperi2-svg/BeeEngine-V2.5.0">GitHub</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="doc">
+      <div class="wrap">
+        <a class="back" href="../index.html#classi">← Torna all'indice</a>
+        <h1>BeePlayer</h1>
+        <p class="lead">Entità giocabile con speed 220, gravità 500, jumpForce iniziale -420, score 0, lives 3 e mode &quot;platformer&quot;. In mode &quot;free&quot; il verticale segue i tasti e vy non usa il salto.</p>
+        <p class="meta">Estende <a href="beeentity.html">BeeEntity</a>. I metodi non elencati qui sono quelli della classe base.</p>
+        <h2>Costruttore</h2>
+        <pre><code>new BeePlayer(x = 100, y = 100, width = 40, height = 40, textureKey = &quot;ape&quot;)</code></pre>
+        
+        <h2>Parametri</h2>
+        <div class="doc-table">
+          <table>
+            <thead><tr><th>Parametro</th><th>Predefinito</th><th>Descrizione</th></tr></thead>
+            <tbody>
+            <tr><td><code>x</code></td><td>100</td><td>Coordinata passata a BeeEntity.</td></tr>
+            <tr><td><code>y</code></td><td>100</td><td>Coordinata passata a BeeEntity.</td></tr>
+            <tr><td><code>width</code></td><td>40</td><td>Larghezza passata a BeeEntity.</td></tr>
+            <tr><td><code>height</code></td><td>40</td><td>Altezza passata a BeeEntity.</td></tr>
+            <tr><td><code>textureKey</code></td><td>&quot;ape&quot;</td><td>Nome passato a engine.getAsset in draw.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2>Metodi pubblici</h2>
+        <div class="doc-table">
+          <table>
+            <thead><tr><th>Metodo</th><th>Parametri</th><th>Descrizione</th></tr></thead>
+            <tbody>
+            <tr><td><code>jump()</code></td><td>—</td><td>Se isGrounded è true oppure mode è &quot;free&quot;, imposta vy = jumpForce e isGrounded false.</td></tr>
+            <tr><td><code>potenziaSalto(amount)</code></td><td>amount</td><td>Imposta jumpForce a baseJumpForce - amount.</td></tr>
+            <tr><td><code>potenziaSaltoTemporaneo(amount, durationMs)</code></td><td>amount, durationMs</td><td>Chiama potenziaSalto(amount) e, dopo durationMs millisecondi, rimette jumpForce a baseJumpForce.</td></tr>
+            <tr><td><code>addScore(points)</code></td><td>points</td><td>Somma points a score.</td></tr>
+            <tr><td><code>takeDamage(amount)</code></td><td>amount = 1</td><td>Scala amount da lives, senza scendere sotto 0. Restituisce true se lives è 0.</td></tr>
+            <tr><td><code>update(dt, input, engine)</code></td><td>dt, input, engine</td><td>Se input manca, esce. vx segue ArrowRight, KeyD, ArrowLeft e KeyA. In platformer il salto usa Space, ArrowUp, KeyW o mouse.wasPressed. In free, ArrowDown/KeyS e ArrowUp/KeyW impostano vy. Poi super.update.</td></tr>
+            <tr><td><code>draw(ctx, engine)</code></td><td>ctx, engine</td><td>Disegna la texture di textureKey se c'è, altrimenti un cerchio giallo, due rettangoli neri e un occhio bianco.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <h2>Esempio</h2>
+        <pre><code>import { BeePlayer } from './BeePlayer.js';
+
+const player = new BeePlayer(100, 100, 40, 40, 'ape');
+player.mode = 'platformer';
+player.isGrounded = true;
+player.jump();
+player.potenziaSalto(80);
+player.addScore(10);
+const finito = player.takeDamage(1);
+player.draw(ctx, null);</code></pre>
+        <a class="back" href="../index.html#classi">← Torna all'indice</a>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap">
+      BeeEngine JS · <a href="https://beeenginejs.com/">beeenginejs.com</a> · <a
+        href="https://www.npmjs.com/package/beeengine">npm</a> · <a
+        href="https://github.com/antonioprosperi2-svg/BeeEngine-V2.5.0">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

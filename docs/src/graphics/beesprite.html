@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BeeSprite — BeeEngine JS</title>
+  <meta name="description" content="Avanza un contatore di fotogrammi e disegna il riquadro corrispondente di un foglio sprite.">
+  <link rel="canonical" href="https://beeenginejs.com/docs/beesprite.html">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b22;
+      --line: #2a2f3a;
+      --txt: #e8eaf0;
+      --mut: #9aa3b2;
+      --acc: #f5b301;
+      --acc2: #ffd34d
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      line-height: 1.6
+    }
+
+    a {
+      color: var(--acc2);
+      text-decoration: none
+    }
+
+    a:hover {
+      text-decoration: underline
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px
+    }
+
+    header {
+      border-bottom: 1px solid var(--line)
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--txt)
+    }
+
+    .logo span {
+      color: var(--acc)
+    }
+
+    nav .links a {
+      margin-left: 20px;
+      color: var(--mut);
+      font-size: .95rem
+    }
+
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      margin-bottom: 18px
+    }
+
+    .hero h1 span {
+      color: var(--acc)
+    }
+
+    .hero p {
+      color: var(--mut);
+      font-size: 1.15rem;
+      max-width: 640px;
+      margin: 0 auto 32px
+    }
+
+    .btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600
+    }
+
+    .btn.p {
+      background: var(--acc);
+      color: #111
+    }
+
+    .btn.p:hover {
+      background: var(--acc2);
+      text-decoration: none
+    }
+
+    .btn.s {
+      border: 1px solid var(--line);
+      color: var(--txt)
+    }
+
+    .btn.s:hover {
+      border-color: var(--acc);
+      text-decoration: none
+    }
+
+    pre {
+      background: #0a0c10;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-size: .92rem;
+      text-align: left
+    }
+
+    code {
+      font-family: ui-monospace, Consolas, monospace;
+      color: #ffe08a
+    }
+
+    .install {
+      max-width: 420px;
+      margin: 36px auto 0
+    }
+
+    section {
+      padding: 50px 0
+    }
+
+    h2 {
+      font-size: 1.7rem;
+      margin-bottom: 24px;
+      text-align: center
+    }
+
+    h3.cat {
+      font-size: 1.1rem;
+      color: var(--acc);
+      margin: 32px 0 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px
+    }
+
+    .card {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      color: inherit;
+      transition: border-color .15s, transform .15s
+    }
+
+    a.card:hover {
+      border-color: var(--acc);
+      transform: translateY(-2px);
+      text-decoration: none
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+      color: var(--txt)
+    }
+
+    .card p {
+      color: var(--mut);
+      font-size: .95rem
+    }
+
+    .ico {
+      font-size: 1.6rem;
+      margin-bottom: 8px
+    }
+
+    .cerca {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--txt);
+      font-size: 1rem
+    }
+
+    .cerca:focus {
+      outline: none;
+      border-color: var(--acc)
+    }
+
+    .nascosto {
+      display: none
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 30px 0;
+      color: var(--mut);
+      font-size: .9rem;
+      text-align: center
+    }
+
+    @media(max-width:560px) {
+      nav .links a:not(:last-child) {
+        display: none
+      }
+    }
+  
+    .doc h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin: 8px 0 12px; text-align: left; }
+    .doc h2 { font-size: 1.25rem; margin: 28px 0 12px; text-align: left; }
+    .doc .lead { color: var(--mut); font-size: 1.05rem; max-width: 720px; }
+    .doc .meta { color: var(--mut); margin: 8px 0 0; }
+    .back { display: inline-block; margin: 8px 0 18px; }
+    .doc-table { overflow-x: auto; margin: 8px 0 4px; }
+    .doc table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    .doc th, .doc td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+    .doc th { background: var(--card); color: var(--acc); font-weight: 600; }
+    .doc td code { white-space: normal; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <nav>
+        <a class="logo" href="../index.html">🐝 Bee<span>Engine</span> JS</a>
+        <div class="links">
+          <a href="../index.html#classi">Documentazione</a>
+          <a href="https://www.npmjs.com/package/beeengine">npm</a>
+          <a href="https://github.com/antonioprosperi2-svg/BeeEngine-V2.5.0">GitHub</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="doc">
+      <div class="wrap">
+        <a class="back" href="../index.html#classi">← Torna all'indice</a>
+        <h1>BeeSprite</h1>
+        <p class="lead">Avanza un contatore di fotogrammi e disegna il riquadro corrispondente di un foglio sprite.</p>
+        
+        <h2>Costruttore</h2>
+        <pre><code>new BeeSprite(image, frameWidth, frameHeight, framesPerRow, speed = 0.1)</code></pre>
+        
+        <h2>Parametri</h2>
+        <div class="doc-table">
+          <table>
+            <thead><tr><th>Parametro</th><th>Predefinito</th><th>Descrizione</th></tr></thead>
+            <tbody>
+            <tr><td><code>image</code></td><td>—</td><td>Immagine passata a drawImage.</td></tr>
+            <tr><td><code>frameWidth</code></td><td>—</td><td>Larghezza di un fotogramma, in pixel.</td></tr>
+            <tr><td><code>frameHeight</code></td><td>—</td><td>Altezza di un fotogramma, in pixel.</td></tr>
+            <tr><td><code>framesPerRow</code></td><td>—</td><td>Fotogrammi per riga, usati per colonna e riga nel foglio.</td></tr>
+            <tr><td><code>speed</code></td><td>0.1</td><td>Quanto aumenta frame per ogni unità di dt. frame parte da 0.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2>Metodi pubblici</h2>
+        <div class="doc-table">
+          <table>
+            <thead><tr><th>Metodo</th><th>Parametri</th><th>Descrizione</th></tr></thead>
+            <tbody>
+            <tr><td><code>update(dt)</code></td><td>dt</td><td>Somma speed * dt a frame.</td></tr>
+            <tr><td><code>draw(ctx, x, y)</code></td><td>ctx, x, y</td><td>Disegna il fotogramma floor(frame % framesPerRow) sulla riga floor(frame / framesPerRow).</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <h2>Esempio</h2>
+        <pre><code>import { BeeSprite } from './BeeSprite.js';
+
+const image = new Image();
+image.src = 'ape.png';
+const sprite = new BeeSprite(image, 32, 32, 4, 0.1);
+sprite.update(0.016);
+sprite.draw(ctx, 100, 80);</code></pre>
+        <a class="back" href="../index.html#classi">← Torna all'indice</a>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap">
+      BeeEngine JS · <a href="https://beeenginejs.com/">beeenginejs.com</a> · <a
+        href="https://www.npmjs.com/package/beeengine">npm</a> · <a
+        href="https://github.com/antonioprosperi2-svg/BeeEngine-V2.5.0">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>

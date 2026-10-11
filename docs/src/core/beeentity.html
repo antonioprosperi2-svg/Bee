@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BeeEntity — BeeEngine JS</title>
+  <meta name="description" content="Nodo dello scene graph: coordinate locali e mondo, velocità, gerarchia di figli e aggancio di un collider rettangolare. Il moto e le collisioni AABB passano da BeePhysics, il disegno dei figli da BeeEntityRenderer.">
+  <link rel="canonical" href="https://beeenginejs.com/docs/beeentity.html">
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b22;
+      --line: #2a2f3a;
+      --txt: #e8eaf0;
+      --mut: #9aa3b2;
+      --acc: #f5b301;
+      --acc2: #ffd34d
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      line-height: 1.6
+    }
+
+    a {
+      color: var(--acc2);
+      text-decoration: none
+    }
+
+    a:hover {
+      text-decoration: underline
+    }
+
+    .wrap {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px
+    }
+
+    header {
+      border-bottom: 1px solid var(--line)
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--txt)
+    }
+
+    .logo span {
+      color: var(--acc)
+    }
+
+    nav .links a {
+      margin-left: 20px;
+      color: var(--mut);
+      font-size: .95rem
+    }
+
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.15;
+      margin-bottom: 18px
+    }
+
+    .hero h1 span {
+      color: var(--acc)
+    }
+
+    .hero p {
+      color: var(--mut);
+      font-size: 1.15rem;
+      max-width: 640px;
+      margin: 0 auto 32px
+    }
+
+    .btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600
+    }
+
+    .btn.p {
+      background: var(--acc);
+      color: #111
+    }
+
+    .btn.p:hover {
+      background: var(--acc2);
+      text-decoration: none
+    }
+
+    .btn.s {
+      border: 1px solid var(--line);
+      color: var(--txt)
+    }
+
+    .btn.s:hover {
+      border-color: var(--acc);
+      text-decoration: none
+    }
+
+    pre {
+      background: #0a0c10;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-size: .92rem;
+      text-align: left
+    }
+
+    code {
+      font-family: ui-monospace, Consolas, monospace;
+      color: #ffe08a
+    }
+
+    .install {
+      max-width: 420px;
+      margin: 36px auto 0
+    }
+
+    section {
+      padding: 50px 0
+    }
+
+    h2 {
+      font-size: 1.7rem;
+      margin-bottom: 24px;
+      text-align: center
+    }
+
+    h3.cat {
+      font-size: 1.1rem;
+      color: var(--acc);
+      margin: 32px 0 12px;
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px
+    }
+
+    .card {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 20px;
+      color: inherit;
+      transition: border-color .15s, transform .15s
+    }
+
+    a.card:hover {
+      border-color: var(--acc);
+      transform: translateY(-2px);
+      text-decoration: none
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 6px;
+      color: var(--txt)
+    }
+
+    .card p {
+      color: var(--mut);
+      font-size: .95rem
+    }
+
+    .ico {
+      font-size: 1.6rem;
+      margin-bottom: 8px
+    }
+
+    .cerca {
+      display: block;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--txt);
+      font-size: 1rem
+    }
+
+    .cerca:focus {
+      outline: none;
+      border-color: var(--acc)
+    }
+
+    .nascosto {
+      display: none
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 30px 0;
+      color: var(--mut);
+      font-size: .9rem;
+      text-align: center
+    }
+
+    @media(max-width:560px) {
+      nav .links a:not(:last-child) {
+        display: none
+      }
+    }
+  
+    .doc h1 { font-size: clamp(1.8rem, 4vw, 2.4rem); margin: 8px 0 12px; text-align: left; }
+    .doc h2 { font-size: 1.25rem; margin: 28px 0 12px; text-align: left; }
+    .doc .lead { color: var(--mut); font-size: 1.05rem; max-width: 720px; }
+    .doc .meta { color: var(--mut); margin: 8px 0 0; }
+    .back { display: inline-block; margin: 8px 0 18px; }
+    .doc-table { overflow-x: auto; margin: 8px 0 4px; }
+    .doc table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    .doc th, .doc td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+    .doc th { background: var(--card); color: var(--acc); font-weight: 600; }
+    .doc td code { white-space: normal; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <nav>
+        <a class="logo" href="../index.html">🐝 Bee<span>Engine</span> JS</a>
+        <div class="links">
+          <a href="../index.html#classi">Documentazione</a>
+          <a href="https://www.npmjs.com/package/beeengine">npm</a>
+          <a href="https://github.com/antonioprosperi2-svg/BeeEngine-V2.5.0">GitHub</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="doc">
+      <div class="wrap">
+        <a class="back" href="../index.html#classi">← Torna all'indice</a>
+        <h1>BeeEntity</h1>
+        <p class="lead">Nodo dello scene graph: coordinate locali e mondo, velocità, gerarchia di figli e aggancio di un collider rettangolare. Il moto e le collisioni AABB passano da BeePhysics, il disegno dei figli da BeeEntityRenderer.</p>
+        
+        <h2>Costruttore</h2>
+        <pre><code>new BeeEntity(x = 0, y = 0, width, height)
+new BeeEntity({ x, y, width, height, ... })</code></pre>
+        <p>Se il primo argomento è un oggetto, i campi sotto sono letti da lì. Altrimenti x, y, width e height sono posizionali. width e height omessi usano BeeEntity.defaults (32 e 32).</p>
+        <h2>Parametri</h2>
+        <div class="doc-table">
+          <table>
+            <thead><tr><th>Parametro</th><th>Predefinito</th><th>Descrizione</th></tr></thead>
+            <tbody>
+            <tr><td><code>x</code></td><td>0</td><td>Coordinata locale, o oggetto di configurazione.</td></tr>
+            <tr><td><code>y</code></td><td>0</td><td>Coordinata locale. Ignorata se x è un oggetto.</td></tr>
+            <tr><td><code>width</code></td><td>defaults.width (32)</td><td>Larghezza. Ignorata se x è un oggetto.</td></tr>
+            <tr><td><code>height</code></td><td>defaults.height (32)</td><td>Altezza. Ignorata se x è un oggetto.</td></tr>
+            <tr><td><code>config.vx</code></td><td>0</td><td>Velocità orizzontale.</td></tr>
+            <tr><td><code>config.vy</code></td><td>0</td><td>Velocità verticale.</td></tr>
+            <tr><td><code>config.gravity</code></td><td>defaults.gravity (0)</td><td>Accelerazione verticale in px/s².</td></tr>
+            <tr><td><code>config.gravityScale</code></td><td>1</td><td>Moltiplicatore della gravità.</td></tr>
+            <tr><td><code>config.maxFallSpeed</code></td><td>2000</td><td>Limite di vy verso il basso. 0 non limita.</td></tr>
+            <tr><td><code>config.friction</code></td><td>0</td><td>Decelerazione orizzontale a terra, in px/s².</td></tr>
+            <tr><td><code>config.airFriction</code></td><td>0</td><td>Decelerazione orizzontale in aria, in px/s².</td></tr>
+            <tr><td><code>config.landingTolerance</code></td><td>10</td><td>Tolleranza di atterraggio in pixel.</td></tr>
+            <tr><td><code>config.landingSweep</code></td><td>0.1</td><td>Secondi usati per stimare il bordo inferiore precedente.</td></tr>
+            <tr><td><code>config.maxTimeStep</code></td><td>0.05</td><td>Passo massimo di integrazione in secondi.</td></tr>
+            <tr><td><code>config.name</code></td><td>''</td><td>Nome dell'entità.</td></tr>
+            <tr><td><code>config.active</code></td><td>true</td><td>Se false, update non fa nulla.</td></tr>
+            <tr><td><code>config.visible</code></td><td>true</td><td>Flag di visibilità.</td></tr>
+            <tr><td><code>config.parent</code></td><td>—</td><td>Se presente, chiama parent.addChild(this).</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2>Metodi pubblici</h2>
+        <div class="doc-table">
+          <table>
+            <thead><tr><th>Metodo</th><th>Parametri</th><th>Descrizione</th></tr></thead>
+            <tbody>
+            <tr><td><code>static configure(overrides)</code></td><td>overrides = {}</td><td>Copia i campi in BeeEntity.defaults e restituisce quel profilo. Vale per le entità create dopo.</td></tr>
+            <tr><td><code>static resetDefaults()</code></td><td>—</td><td>Ricopia BeeEntityDefaults in BeeEntity.defaults e lo restituisce.</td></tr>
+            <tr><td><code>static isEntity(value)</code></td><td>value</td><td>true se value è un oggetto che ha il campo privato di un BeeEntity.</td></tr>
+            <tr><td><code>get/set x</code></td><td>value</td><td>Coordinata locale. Scriverla invalida la cache mondo del sottoalbero.</td></tr>
+            <tr><td><code>get/set y</code></td><td>value</td><td>Coordinata locale. Scriverla invalida la cache mondo del sottoalbero.</td></tr>
+            <tr><td><code>get/set worldX</code></td><td>value</td><td>Coordinata mondo. In scrittura aggiorna x rispetto al parent.</td></tr>
+            <tr><td><code>get/set worldY</code></td><td>value</td><td>Coordinata mondo. In scrittura aggiorna y rispetto al parent.</td></tr>
+            <tr><td><code>setPosition(x, y)</code></td><td>x, y</td><td>Imposta x e y locali e restituisce this.</td></tr>
+            <tr><td><code>setWorldPosition(worldX, worldY)</code></td><td>worldX, worldY</td><td>Imposta la posizione mondo e restituisce this.</td></tr>
+            <tr><td><code>translate(dx, dy)</code></td><td>dx, dy</td><td>Somma dx e dy alle coordinate locali e restituisce this.</td></tr>
+            <tr><td><code>getWorldBounds(out)</code></td><td>out opzionale</td><td>Scrive x, y, width, height in coordinate mondo nell'oggetto out e lo restituisce.</td></tr>
+            <tr><td><code>get parent</code></td><td>—</td><td>Il parent, oppure null.</td></tr>
+            <tr><td><code>get children</code></td><td>—</td><td>Copia congelata dei figli. Lista vuota condivisa se non ci sono figli.</td></tr>
+            <tr><td><code>get childCount</code></td><td>—</td><td>Numero di figli.</td></tr>
+            <tr><td><code>get/set destroyed</code></td><td>value</td><td>Lettura dello stato. Assegnare true chiama destroy().</td></tr>
+            <tr><td><code>addChild(entity, options)</code></td><td>entity, { keepWorldPosition = false }</td><td>Aggiunge un figlio. Se keepWorldPosition è true, la posizione mondo resta quella di prima. Rifiuta i cicli.</td></tr>
+            <tr><td><code>removeChild(entity, options)</code></td><td>entity, { keepWorldPosition = false }</td><td>Toglie un figlio senza distruggerlo. Con keepWorldPosition true ricalcola le coordinate locali.</td></tr>
+            <tr><td><code>detach(options)</code></td><td>{ keepWorldPosition = false }</td><td>Si toglie dal parent, se c'è, e restituisce this.</td></tr>
+            <tr><td><code>isAncestorOf(node)</code></td><td>node</td><td>true se questo nodo è un antenato di node.</td></tr>
+            <tr><td><code>getRoot()</code></td><td>—</td><td>Risale i parent e restituisce la radice.</td></tr>
+            <tr><td><code>traverse(callback)</code></td><td>callback</td><td>Visita questo nodo e i discendenti BeeEntity. Si ferma se la callback restituisce false.</td></tr>
+            <tr><td><code>addRectCollider(offsetX, offsetY, width, height)</code></td><td>offsetX = 0, offsetY = 0, width = null, height = null</td><td>Crea un BeeRectCollider, lo salva in collider e lo restituisce. width e height null usano quelli dell'entità.</td></tr>
+            <tr><td><code>collidesWith(other)</code></td><td>other</td><td>true se i rettangoli mondo si sovrappongono. Delega a BeePhysics.overlaps.</td></tr>
+            <tr><td><code>resolvePlatformCollision(platform)</code></td><td>platform</td><td>Separa questa entità dal solido. Restituisce true solo se atterra sopra.</td></tr>
+            <tr><td><code>update(dt, input, engine)</code></td><td>dt, input, engine</td><td>Se active e non destroyed: integra il moto, chiama onUpdate, poi updateChildren.</td></tr>
+            <tr><td><code>onUpdate(dt, input, engine)</code></td><td>dt, input, engine</td><td>Hook vuoto per le sottoclassi.</td></tr>
+            <tr><td><code>updateChildren(dt, input, engine)</code></td><td>dt, input, engine</td><td>Chiama update sui figli attivi e non destroyed.</td></tr>
+            <tr><td><code>draw(ctx, engine)</code></td><td>ctx, engine</td><td>Disegna i figli tramite BeeEntityRenderer.renderChildren.</td></tr>
+            <tr><td><code>onDestroy()</code></td><td>—</td><td>Hook vuoto chiamato da destroy prima di smontare i figli.</td></tr>
+            <tr><td><code>destroy(options)</code></td><td>{ destroyChildren = true }</td><td>Segna destroyed, chiama onDestroy, smonta i figli, si stacca dal parent e azzera il collider. Restituisce this.</td></tr>
+            <tr><td><code>toJSON()</code></td><td>—</td><td>Restituisce name, coordinate, dimensioni, velocità, isGrounded, active, visible e destroyed.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2>Export dello stesso file</h2>
+        <p>Nello stesso modulo ci sono anche questi oggetti. Non sono metodi di BeeEntity.</p>
+        <div class="doc-table">
+          <table>
+            <thead><tr><th>Metodo</th><th>Parametri</th><th>Descrizione</th></tr></thead>
+            <tbody>
+            <tr><td><code>BeePhysics.integrate(entity, dt)</code></td><td>entity, dt</td><td>Aggiorna vy con gravità e maxFallSpeed, frena vx con friction o airFriction, poi translate. Azzera isGrounded.</td></tr>
+            <tr><td><code>BeePhysics.overlaps(a, b)</code></td><td>a, b</td><td>true se i due AABB mondo si intersecano. false se manca un oggetto o se a e b sono lo stesso.</td></tr>
+            <tr><td><code>BeePhysics.resolveSolid(entity, solid)</code></td><td>entity, solid</td><td>Spinge l'entità fuori dal solido sull'asse di penetrazione minore. true solo in caso di atterraggio.</td></tr>
+            <tr><td><code>BeeEntityRenderer.renderChildren(entity, ctx, engine)</code></td><td>entity, ctx, engine</td><td>Disegna i figli visibili. Usa engine.drawEntity se esiste, altrimenti child.draw.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h2>Esempio</h2>
+        <pre><code>import { BeeEntity } from './BeeEntity.js';
+
+BeeEntity.configure({ gravity: 900 });
+
+const blocco = new BeeEntity(100, 50, 40, 40);
+const figlio = new BeeEntity({ x: 8, y: 0, width: 16, height: 16, name: 'ala' });
+blocco.addChild(figlio);
+blocco.addRectCollider();
+blocco.translate(2, 0);
+
+const altro = new BeeEntity(120, 50, 40, 40);
+if (blocco.collidesWith(altro)) {
+  blocco.resolvePlatformCollision(altro);
+}
+
+blocco.update(0.016, null, null);
+blocco.destroy();</code></pre>
+        <a class="back" href="../index.html#classi">← Torna all'indice</a>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <div class="wrap">
+      BeeEngine JS · <a href="https://beeenginejs.com/">beeenginejs.com</a> · <a
+        href="https://www.npmjs.com/package/beeengine">npm</a> · <a
+        href="https://github.com/antonioprosperi2-svg/BeeEngine-V2.5.0">GitHub</a>
+    </div>
+  </footer>
+</body>
+</html>
